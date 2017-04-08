@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  remote_user: root
+  vars:
+    gitvenv_clone_dir: "/tmp/clones"  # All repo. will be cloned here
+    project_aurora_repositories:
+      - name: "ssh-harness"
+        url: "https://github.com/cans/ssh-harness.git"
+      - name: "vcs-ssh"
+        url: "https://github.com/cans/vcs-ssh.git"
+      - name: "vcsd"
+        url: "https://github.com/cans/vcsd.git"
+        dest: "/home/root/projects/aurora"  # Override clone destination directory.
+
+  roles:
+    - role: gitvenv
+      gitvenv_repositories: "{{project_aurora_repositories}}"
+      gitvenv_user: "cans"
+      gitvenv_workon_home_dir: "/tmp/virtualenvs/"
+      gitvenv_python: python2.7

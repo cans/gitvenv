@@ -1,0 +1,49 @@
+---
+- name: Clone Git Repository
+  git:
+    clone: "yes"
+    accept_hostkey: "yes"
+    dest: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"
+    repo: "{{item.url}}"
+    track_submodules: "{{item.tracksubmodules|default('no')}}"
+    umask: "0077"
+    bare: "{{item.bare|default('no')}}"
+  remote_user: "{{gitvenv_user}}"
+  with_items: "{{gitvenv_repositories}}"
+
+- name: Create a virtualenv for the cloned repository and install requirements in it
+  pip: 
+    requirements: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}/requirements.txt"
+    virtualenv: "{{gitvenv_workon_home_dir}}/{{item.name}}"
+    virtualenv_python: "{{item.python|default(gitvenv_python)}}"
+    virtualenv_site_packages: "{{item.site_packages|default('no')}}"
+  remote_user: "{{gitvenv_user}}"
+  with_items: "{{gitvenv_repositories}}"
+  
+- name: Install cloned code inside the virtualenv
+  pip:
+    name: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"
+    chdir: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"
+    editable: True
+    virtualenv: "{{gitvenv_workon_home_dir}}/{{item.name}}"
+  remote_user: "{{gitvenv_user}}"
+  when: "{{item.install|default(false)}}"
+  with_items: "{{gitvenv_repositories}}"
+
+- name: Setup user shell to use the virtual environments
+  lineinfile:
+    dest: "~/.bashrc"
+    line: "export WORKON_HOME='{{gitvenv_workon_home_dir}}'"
+    regexp: "^export\\W*WORKON_HOME=.*"
+    state: present
+  remote_user: "{{gitvenv_user}}"
+
+- name: Setup user default active virtual environment
+  lineinfile:
+    dest: "~/.bashrc"
+    line: "workon {{item.name}}"
+    regexp: "^workon\\W*"
+    state: present
+  remote_user: "{{gitvenv_user}}"
+  when: "{{item.default|default(false)}}"
+  with_items: "{{gitvenv_repositories}}"
