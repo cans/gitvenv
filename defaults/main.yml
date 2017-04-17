@@ -1,6 +1,7 @@
 ---
-gitvenv_user: "kpler"
-gitvenv_home_dir: "~"
-gitvenv_workon_home_dir: "{{gitvenv_home_dir}}/.virtualenvs/"
-gitvenv_python: "python3.5"
 gitvenv_clone_dir: "{{gitvenv_home_dir}}"
+gitvenv_home_dir: "~"
+gitvenv_python: "python3.5"
+gitvenv_requirements: "requirements.txt"
+gitvenv_user: "{{ansible_user_id}}"
+gitvenv_workon_home_dir: "{{gitvenv_home_dir}}/.virtualenvs"

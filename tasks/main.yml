@@ -3,23 +3,34 @@
   git:
     clone: "yes"
     accept_hostkey: "yes"
-    dest: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"
-    repo: "{{item.url}}"
-    track_submodules: "{{item.tracksubmodules|default('no')}}"
+    dest: "{{item.dest | default(gitvenv_clone_dir)}}/{{item.name}}"
+    repo: "{{ item.url | default(gitvenv_base_url + '/' + item.name + '.git') }}"
+    track_submodules: "{{ item.tracksubmodules|default('no') }}"
     umask: "0077"
     bare: "{{item.bare|default('no')}}"
   remote_user: "{{gitvenv_user}}"
   with_items: "{{gitvenv_repositories}}"
 
+- name: Create virtualenv with pip >= 9.0.1 in it (temporary fix until Debian Stretch is out)
+  pip:
+    name: "{{item[1]}}"
+    virtualenv: "{{gitvenv_workon_home_dir}}/{{item[0].name}}"
+    virtualenv_python: "{{item[0].python|default(gitvenv_python)}}"
+    virtualenv_site_packages: "{{item[0].site_packages|default('no')}}"
+  remote_user: "{{gitvenv_user}}"
+  with_nested:
+    - "{{gitvenv_repositories}}"
+    - ["pip>=9.0.1",  "packaging"]
+
 - name: Create a virtualenv for the cloned repository and install requirements in it
-  pip: 
-    requirements: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}/requirements.txt"
+  pip:
+    requirements: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}/{{item.requirements|default(gitvenv_requirements)}}"
     virtualenv: "{{gitvenv_workon_home_dir}}/{{item.name}}"
     virtualenv_python: "{{item.python|default(gitvenv_python)}}"
     virtualenv_site_packages: "{{item.site_packages|default('no')}}"
   remote_user: "{{gitvenv_user}}"
   with_items: "{{gitvenv_repositories}}"
-  
+
 - name: Install cloned code inside the virtualenv
   pip:
     name: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"

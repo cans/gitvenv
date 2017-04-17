@@ -1,7 +1,7 @@
 cans.gitvenv
 ============
 
-Clone Python project git repositories and setup an associated virtual environment for each
+Clone Python project git repositories and setup a virtual environment for each
 
 
 ## How does it works
@@ -16,11 +16,13 @@ environment with virtualwrapper's `workon` command.
 Each repository to clone and setup has to be specified as follows:
 
       - name: myapp
-        url: git@github.com:Account/repository.git
         bare: "yes"                                 # default: no
-        dest: "/var/lib"                            # default: {{gitvenv_clone_dir}}
         default: true                               # default: {{omit}}
+        dest: "/var/lib"                            # default: {{gitvenv_clone_dir}}
         requires: "dev-requirements.txt"            # default: {{gitvenv_requirements}}
+        site_packages: yes                          # default: no
+        url: git@github.com:Account/repository.git  # default: "{{gitvenv_base_url + '/' + name + '.git'}}"
+
 
 Values for which no default value is indicated are *mandatory*.
 
@@ -72,13 +74,22 @@ This role assumes `git` and `pip` are available on the target host.
 Role Variables
 --------------
 
+All the variables of this role are namespaced using the prefix `gitvenv_`
+
+- `gitvenv_base_url`: the base url to use if not url is given. The url
+  to use for the repository to clone is then:
+
+       "{{ gitvenv_base_url + '/' + name + '.git'}}"
+
+  Where name is the name given in the repository defition (see above).
 - `gitvenv_clone_dir`: the directory in which store git clones
+- `gitvenv_home_dir`:
 - `gitvenv_python`: the version of python with which create the virtual
   environment(s);
 - `gitvenv_requirements`: the default filename (or path, relative to
   `{{dest}}/{{name}}`) of the pip requirements file to use.
 - `gitvenv_user`: the user for which install and setup the virtual
-  environment(s);
+  environment(s) (default: `ansible_user_id`);
 - `gitvenv_workon_home_dir`: the directory in which install the virtual
   environment(s);
 
@@ -119,9 +130,9 @@ included in the playbook.
 License
 -------
 
-MIT
+GPLv2
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Copyright © 2017, Nicolas CANIART
