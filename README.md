@@ -57,8 +57,8 @@ login.
 
 To be able to set-up the user's shell in a consistent manner, this role
 assumes all virtual environment will be created in the same place and
-for a unique user. This means you cannot override the `gitvenv_user`
-and `gitvenv_workon_home_dir` on a per-repository basis.
+for a unique user. This means you cannot override the
+`gitvenv_workon_home_dir` variable on a per-repository basis.
 
 You can however use this roles several times in a single playbook to
 clone several git repositories and setup their respective virtual
@@ -88,8 +88,6 @@ All the variables of this role are namespaced using the prefix `gitvenv_`
   environment(s);
 - `gitvenv_requirements`: the default filename (or path, relative to
   `{{dest}}/{{name}}`) of the pip requirements file to use.
-- `gitvenv_user`: the user for which install and setup the virtual
-  environment(s) (default: `ansible_user_id`);
 - `gitvenv_workon_home_dir`: the directory in which install the virtual
   environment(s);
 
@@ -120,7 +118,6 @@ Here is an example playbook to clone and setup a virtualenv for a project.
       roles:
         - role: cans.gitvenv
           gitvenv_repositories: "{{project_aurora_repositories}}"
-          gitvenv_user: "cans"
           gitvenv_workon_home_dir: "~/.virtualenvs/"
           gitvenv_python: python2.7
 

@@ -8,7 +8,6 @@
     track_submodules: "{{ item.tracksubmodules|default('no') }}"
     umask: "0077"
     bare: "{{item.bare|default('no')}}"
-  remote_user: "{{gitvenv_user}}"
   with_items: "{{gitvenv_repositories}}"
 
 - name: Create virtualenv with pip >= 9.0.1 in it (temporary fix until Debian Stretch is out)
@@ -17,7 +16,6 @@
     virtualenv: "{{gitvenv_workon_home_dir}}/{{item[0].name}}"
     virtualenv_python: "{{item[0].python|default(gitvenv_python)}}"
     virtualenv_site_packages: "{{item[0].site_packages|default('no')}}"
-  remote_user: "{{gitvenv_user}}"
   with_nested:
     - "{{gitvenv_repositories}}"
     - ["pip>=9.0.1",  "packaging"]
@@ -28,7 +26,6 @@
     virtualenv: "{{gitvenv_workon_home_dir}}/{{item.name}}"
     virtualenv_python: "{{item.python|default(gitvenv_python)}}"
     virtualenv_site_packages: "{{item.site_packages|default('no')}}"
-  remote_user: "{{gitvenv_user}}"
   with_items: "{{gitvenv_repositories}}"
 
 - name: Install cloned code inside the virtualenv
@@ -37,7 +34,6 @@
     chdir: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"
     editable: True
     virtualenv: "{{gitvenv_workon_home_dir}}/{{item.name}}"
-  remote_user: "{{gitvenv_user}}"
   when: "{{item.install|default(false)}}"
   with_items: "{{gitvenv_repositories}}"
 
@@ -47,7 +43,6 @@
     line: "export WORKON_HOME='{{gitvenv_workon_home_dir}}'"
     regexp: "^export\\W*WORKON_HOME=.*"
     state: present
-  remote_user: "{{gitvenv_user}}"
 
 - name: Setup user default active virtual environment
   lineinfile:
@@ -55,6 +50,8 @@
     line: "workon {{item.name}}"
     regexp: "^workon\\W*"
     state: present
-  remote_user: "{{gitvenv_user}}"
-  when: "{{item.default|default(false)}}"
+  when: "item.default|default(false)"
   with_items: "{{gitvenv_repositories}}"
+
+
+# vim: syntax=yaml:ts=2:sw=2:et:
