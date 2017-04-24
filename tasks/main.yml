@@ -56,5 +56,5 @@
     regexp: "^workon\\W*"
     state: present
   remote_user: "{{gitvenv_user}}"
-  when: "{{item.default|default(false)}}"
+  when: "item.default|default(false)"
   with_items: "{{gitvenv_repositories}}"
