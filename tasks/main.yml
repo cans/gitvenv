@@ -22,9 +22,12 @@
     - "{{gitvenv_repositories}}"
     - ["pip>=9.0.1",  "packaging"]
 
+- name: Requirement file to use
+  debug: var="gitvenv_requirements_file"
+
 - name: Create a virtualenv for the cloned repository and install requirements in it
   pip:
-    requirements: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}/{{item.requirements|default(gitvenv_requirements)}}"
+    requirements: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}/{{item.requirements|default(gitvenv_requirements_file)}}"
     virtualenv: "{{gitvenv_workon_home_dir}}/{{item.name}}"
     virtualenv_python: "{{item.python|default(gitvenv_python)}}"
     virtualenv_site_packages: "{{item.site_packages|default('no')}}"

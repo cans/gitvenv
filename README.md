@@ -86,8 +86,8 @@ All the variables of this role are namespaced using the prefix `gitvenv_`
 - `gitvenv_home_dir`:
 - `gitvenv_python`: the version of python with which create the virtual
   environment(s);
-- `gitvenv_requirements`: the default filename (or path, relative to
-  `{{dest}}/{{name}}`) of the pip requirements file to use.
+- `gitvenv_requirements_file`: the default filename (or path, relative
+  to `{{dest}}/{{name}}`) of the pip requirements file to use.
 - `gitvenv_user`: the user for which install and setup the virtual
   environment(s) (default: `ansible_user_id`);
 - `gitvenv_workon_home_dir`: the directory in which install the virtual
