@@ -1,0 +1,4 @@
+---
+gitvenv_virtualenvs_dirname: ".virtualenvs"
+
+# vim: et:syntax=yaml:sw=2:ts=2:

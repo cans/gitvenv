@@ -16,12 +16,14 @@ environment with virtualwrapper's `workon` command.
 Each repository to clone and setup has to be specified as follows:
 
       - name: myapp
-        bare: "yes"                                 # default: no
+        bare: "yes"                                 # default: false
         default: true                               # default: {{omit}}
         dest: "/var/lib"                            # default: {{gitvenv_clone_dir}}
         requires: "dev-requirements.txt"            # default: {{gitvenv_requirements}}
-        site_packages: yes                          # default: no
+        site_packages: true                         # default: false
         url: git@github.com:Account/repository.git  # default: "{{gitvenv_base_url + '/' + name + '.git'}}"
+        install: true                               # default: false
+        branch: feature/fancy-new-one               # default: "{{gitvenv_branch}}"
 
 
 Values for which no default value is indicated are *mandatory*.
@@ -43,7 +45,14 @@ Then it will create a virtualenv in `{{workon_home}}` named `{{name}}`,
     virtualenv /opt/virtualenv/myapp
     cd /var/lib/myapp
     pip install --upgrade -r requirements.txt
-    
+
+On the virtualenv is setup, you may want to install the code you checked
+out from git inside the virtualenv. If you set the `install` variable
+to `true`, then this role will install do so, in development mode:
+
+    cd /var/lib/myapp
+    pip install -e .
+
 
 And finally it will update the users `~/.bashrc` to define and export
 the `WORKON_HOME` variable, set to the value of`gitvenv_workon_home_dir`;
@@ -62,7 +71,7 @@ and `gitvenv_workon_home_dir` on a per-repository basis.
 
 You can however use this roles several times in a single playbook to
 clone several git repositories and setup their respective virtual
-environments.
+environments and for different users.
 
 
 Requirements
@@ -75,6 +84,9 @@ Role Variables
 --------------
 
 All the variables of this role are namespaced using the prefix `gitvenv_`
+
+
+Role input variables:
 
 - `gitvenv_base_url`: the base url to use if not url is given. The url
   to use for the repository to clone is then:
@@ -91,7 +103,22 @@ All the variables of this role are namespaced using the prefix `gitvenv_`
 - `gitvenv_user`: the user for which install and setup the virtual
   environment(s) (default: `ansible_user_id`);
 - `gitvenv_workon_home_dir`: the directory in which install the virtual
-  environment(s);
+  environment(s) (default: `"{{gitvenv_workon_home_dir}}/{{gitvenv_virtualenvs_dirname}}"`);
+- `gitvenv_workon_regex`: the pattern used to find the virtualenv activation command in the
+  users shell profile.
+
+All those variables are defined in the `defaults/main.yml` file. They can
+be overriden as you need either globally, _e.g._ in you playbook's `vars`
+section or at the role level (_cf._ [examples](#Example Playbook) below)
+
+
+Variables intended to be used in other roles:
+
+
+- `gitvenv_virtualenvs_dirname`: the name of the directory in which store
+  Python virtual environments. Helper (default: `.virtualenvs`);
+
+All those variables are defined in the `vars/main.yml` file.
 
 
 Dependencies
@@ -111,9 +138,9 @@ Here is an example playbook to clone and setup a virtualenv for a project.
         project_aurora_repositories:
           - name: "ssh-harness"
             url: "https://github.com/cans/ssh-harness.git"
-          - name: "ssh-harness"
+          - name: "vcs-ssh"
             url: "https://github.com/cans/vcs-ssh.git"
-          - name: "ssh-harness"
+          - name: "vcsd"
             url: "https://github.com/cans/vcsd.git"
             dest: "/home/cans/projects/aurora"  # Override clone destination directory.
 
@@ -126,6 +153,7 @@ Here is an example playbook to clone and setup a virtualenv for a project.
 
 Of course most variable would be better defined in a seperate file under `vars/` and
 included in the playbook.
+
 
 License
 -------

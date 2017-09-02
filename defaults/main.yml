@@ -1,7 +1,30 @@
 ---
+gitvenv_bash_completion_block: |
+  # enable programmable completion features (you don't need to enable
+  # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+  # sources /etc/bash.bashrc).
+  if ! shopt -oq posix; then
+    if [ -f /usr/share/bash-completion/bash_completion ]; then
+      . /usr/share/bash-completion/bash_completion
+    elif [ -f /etc/bash_completion ]; then
+      . /etc/bash_completion
+    fi
+  fi
+gitvenv_branch: "master"
 gitvenv_clone_dir: "{{gitvenv_home_dir}}"
-gitvenv_home_dir: "~"
+gitvenv_create_bashrc_when_missing: true
+gitvenv_force_reinstall: false
+gitvenv_home_dir: "/home/{{ansible_user_id}}"
+gitvenv_install: false
+gitvenv_no_requirements: false
+gitvenv_pip_ok: false
 gitvenv_python: "python3.5"
 gitvenv_requirements_file: "requirements.txt"
+# setup is the default, cause it is the one mode that is idempotent
+gitvenv_runmode: "setup"
 gitvenv_user: "{{ansible_user_id}}"
+gitvenv_user_profile_file: "~/.bash_profile"
 gitvenv_workon_home_dir: "{{gitvenv_home_dir}}/.virtualenvs"
+gitvenv_workon_regex: "^workon\\W*"
+
+# vim: et:syntax=yaml:sw=2:ts=2:

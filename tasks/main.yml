@@ -8,58 +8,82 @@
     track_submodules: "{{ item.tracksubmodules|default('no') }}"
     umask: "0077"
     bare: "{{item.bare|default('no')}}"
-  remote_user: "{{gitvenv_user}}"
+    refspec: "{{ item.branch | default(gitvenv_branch) }}"
+    version: "{{ item.branch | default(gitvenv_branch) }}"
   with_items: "{{gitvenv_repositories}}"
+  remote_user: "{{gitvenv_user}}"
 
-- name: Create virtualenv with pip >= 9.0.1 in it (temporary fix until Debian Stretch is out)
+- name: Create virtualenv with pip >= 9.0.1 in it (temporary fix until Debian Stretch is out and usable)
   pip:
     chdir: "{{item.dest|default(gitvenv_clone_dir)}}/{{item[0].name}}"
     name: "{{item[1]}}"
+    state: "present"
     virtualenv: "{{gitvenv_workon_home_dir}}/{{item[0].name}}"
     virtualenv_python: "{{item[0].python|default(gitvenv_python)}}"
     virtualenv_site_packages: "{{item[0].site_packages|default('no')}}"
   remote_user: "{{gitvenv_user}}"
+  when: "gitvenv_runmode == 'setup' and not gitvenv_pip_ok"
   with_nested:
     - "{{gitvenv_repositories}}"
     - ["pip>=9.0.1",  "packaging"]
 
-- name: Requirement file to use
-  debug: var="gitvenv_requirements_file"
+- name: Displaying running mode
+  debug: var="gitvenv_runmode"
+  when: "lookup('env', 'DEBUG') is defined"
 
 - name: Create a virtualenv for the cloned repository and install requirements in it
   pip:
     chdir: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"
+    extra_args: --upgrade
     requirements: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}/{{item.requirements|default(gitvenv_requirements_file)}}"
+    state: "present"
     virtualenv: "{{gitvenv_workon_home_dir}}/{{item.name}}"
     virtualenv_python: "{{item.python|default(gitvenv_python)}}"
     virtualenv_site_packages: "{{item.site_packages|default('no')}}"
   remote_user: "{{gitvenv_user}}"
+  when: "not item.no_requirements|default(gitvenv_no_requirements)"
   with_items: "{{gitvenv_repositories}}"
 
+# Install is generally only needed once, during setup,
+# or when python packages are added or removed.
 - name: Install cloned code inside the virtualenv
   pip:
     chdir: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"
     editable: True
+    extra_args: --upgrade
     name: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"
+    state: "present"
     virtualenv: "{{gitvenv_workon_home_dir}}/{{item.name}}"
   remote_user: "{{gitvenv_user}}"
-  when: "{{item.install|default(false)}}"
+  when: "gitvenv_force_reinstall or item.install|default(gitvenv_install)"
   with_items: "{{gitvenv_repositories}}"
 
 - name: Setup user shell to use the virtual environments
   lineinfile:
-    dest: "~/.bashrc"
+    dest: "{{gitvenv_user_profile_file}}"
     line: "export WORKON_HOME='{{gitvenv_workon_home_dir}}'"
     regexp: "^export\\W*WORKON_HOME=.*"
     state: present
+    create: "{{gitvenv_create_bashrc_when_missing}}"
+  when: "gitvenv_runmode == 'setup'"
   remote_user: "{{gitvenv_user}}"
 
 - name: Setup user default active virtual environment
   lineinfile:
-    dest: "~/.bashrc"
+    dest: "{{gitvenv_user_profile_file}}"
     line: "workon {{item.name}}"
-    regexp: "^workon\\W*"
+    regexp: "{{gitvenv_workon_regex}}"
     state: present
+    create: "{{gitvenv_create_bashrc_when_missing}}"
   remote_user: "{{gitvenv_user}}"
-  when: "item.default|default(false)"
+  when: "gitvenv_runmode == 'setup' and item.default|default(false)"
   with_items: "{{gitvenv_repositories}}"
+
+- name: Ensure bash completion is enabled
+  blockinfile:
+    path: "{{gitvenv_user_profile_file}}"
+    block: "{{gitvenv_bash_completion_block}}"
+    insertbefore: "{{gitvenv_workon_regex}}"
+  when: "gitvenv_runmode == 'setup'"
+
+# vim: et:syntax=yaml:sw=2:ts=2:
