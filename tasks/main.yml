@@ -51,9 +51,9 @@
   pip:
     chdir: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"
     editable: True
-    extra_args: --upgrade
     name: "{{item.dest|default(gitvenv_clone_dir)}}/{{item.name}}"
-    state: "present"
+    state: "forcereinstall"
+    extra_args: "-e"
     virtualenv: "{{gitvenv_workon_home_dir}}/{{item.name}}"
   remote_user: "{{gitvenv_user}}"
   when: "gitvenv_force_reinstall or item.install|default(gitvenv_install)"
