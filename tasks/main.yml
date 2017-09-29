@@ -3,13 +3,14 @@
   git:
     clone: "yes"
     accept_hostkey: "yes"
-    dest: "{{item.dest | default(gitvenv_clone_dir)}}/{{item.name}}"
+    dest: "{{ item.dest | default(gitvenv_clone_dir)}}/{{item.name}}"
     repo: "{{ item.url | default(gitvenv_base_url + '/' + item.name + '.git') }}"
     track_submodules: "{{ item.tracksubmodules|default('no') }}"
     umask: "0077"
     bare: "{{item.bare|default('no')}}"
     refspec: "{{ item.branch | default(gitvenv_branch) }}"
     version: "{{ item.branch | default(gitvenv_branch) }}"
+    force: "{{ item.force | default(gitvenv_git_force) }}"
   with_items: "{{gitvenv_repositories}}"
   remote_user: "{{gitvenv_user}}"
 

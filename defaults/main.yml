@@ -14,6 +14,7 @@ gitvenv_branch: "master"
 gitvenv_clone_dir: "{{gitvenv_home_dir}}"
 gitvenv_create_bashrc_when_missing: true
 gitvenv_force_reinstall: false
+gitvenv_git_force: false
 gitvenv_home_dir: "/home/{{ansible_user_id}}"
 gitvenv_install: false
 gitvenv_no_requirements: false

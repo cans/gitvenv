@@ -96,6 +96,7 @@ Role input variables:
   Where name is the name given in the repository defition (see above).
 - `gitvenv_clone_dir`: the directory in which store git clones
 - `gitvenv_home_dir`:
+- `gitvenv_git_force`: whether to allow git to override local changes (default: `false`);
 - `gitvenv_python`: the version of python with which create the virtual
   environment(s);
 - `gitvenv_requirements_file`: the default filename (or path, relative
